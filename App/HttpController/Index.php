@@ -15,6 +15,33 @@ class Index extends Controller
 {
     function index()
     {
+        $config = new \EasySwoole\ElasticSearch\Config([
+            'host'          => '127.0.0.1',
+            'port'          => 9200
+        ]);
+
+        $elasticsearch = new \EasySwoole\ElasticSearch\ElasticSearch($config);
+
+        go(function()use($elasticsearch){
+            $bean = new \EasySwoole\ElasticSearch\RequestBean\Create();
+            $bean->setIndex('my_index');
+            $bean->setType('my_type');
+            $bean->setId('my_id');
+            $bean->setBody(['test_field' => 'test_data']);
+            $response = $elasticsearch->client()->create($bean)->getBody();
+            $response = json_decode($response,true);
+            var_dump($response['result']);
+        });
+
+        go(function()use($elasticsearch){
+            $bean = new \EasySwoole\ElasticSearch\RequestBean\Get();
+            $bean->setIndex('my-index');
+            $bean->setType('my-type');
+            $bean->setId('my-id');
+            $response = $elasticsearch->client()->get($bean)->getBody();
+            var_dump(json_decode($response, true));
+        });
+
         /*$p = new Xky();
         $this->response()->write('asslllj');
 

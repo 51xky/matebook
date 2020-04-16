@@ -4,7 +4,8 @@
         "easyswoole/http-annotation": "dev-master",
         "easyswoole/orm": "^1.4",
         "easyswoole/spider": "^2.0",
-        "easyswoole/elasticsearch": "^1.0"
+        "easyswoole/elasticsearch": "^1.0",
+        "easyswoole/hot-reload": "^0.1.2"
     },
     "autoload": {
         "psr-4": {

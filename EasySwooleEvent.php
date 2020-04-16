@@ -2,14 +2,12 @@
 namespace EasySwoole\EasySwoole;
 
 
-use App\Spider\ConsumeTest;
-use App\Spider\ProductTest;
 use EasySwoole\EasySwoole\Swoole\EventRegister;
 use EasySwoole\EasySwoole\AbstractInterface\Event;
 use EasySwoole\Http\Request;
 use EasySwoole\Http\Response;
-use EasySwoole\Spider\Config\SpiderConfig;
-use EasySwoole\Spider\SpiderServer;
+use EasySwoole\ORM\Db\Connection;
+use EasySwoole\ORM\DbManager;
 
 class EasySwooleEvent implements Event
 {
@@ -22,6 +20,33 @@ class EasySwooleEvent implements Event
 
     public static function mainServerCreate(EventRegister $register)
     {
+        $config = (new \EasySwoole\ORM\Db\Config())
+            ->setDatabase('ekp')
+            ->setUser('root')
+            ->setPassword('root')
+            ->setHost('localhost')
+            ->setPort('3306')
+            ->setCharset('utf8')
+            ->setTimeout(10)
+            ->setFetchMode(false)// fetch类型
+            ->setStrictType(false)// 严格模式
+            ->setExtraConf([])// 额外配置值
+            ->setIntervalCheckTime(3)// 连接池检测间隔
+            ->setGetObjectTimeout(3.0)// 连接池的超时时间
+            ->setMaxIdleTime(15)// 连接池最大闲置时间
+            ->setMaxObjectNum(20)// 连接池最大数量
+            ->setMinObjectNum(5);// 连接池最小数量
+        DbManager::getInstance()->addConnection(new Connection($config));
+
+        // 配置同上别忘了添加要检视的目录
+        $hotReloadOptions = new \EasySwoole\HotReload\HotReloadOptions();
+        $hotReload = new \EasySwoole\HotReload\HotReload($hotReloadOptions);
+        $hotReloadOptions->setMonitorFolder([EASYSWOOLE_ROOT . '/App']);
+
+        $server = ServerManager::getInstance()->getSwooleServer();
+        $hotReload->attachToServer($server);
+
+
         /*################# tcp 服务器1 没有处理粘包 #####################
         $tcp1ventRegister = $subPort1 = ServerManager::getInstance()->addServer('tcp1', 9502, SWOOLE_TCP, '0.0.0.0', [
             'open_length_check' => false,//不验证数据包
@@ -42,6 +67,7 @@ class EasySwooleEvent implements Event
         $register->add($register::onWorkerStart,function (\swoole_server $server,int $workerId){
             var_dump($workerId.'start');
         });*/
+
     }
 
     public static function onRequest(Request $request, Response $response): bool
